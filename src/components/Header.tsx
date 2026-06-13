@@ -1,19 +1,30 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text } from "react-native";
+// src/components/Header.tsx
 
-type HeaderProps = {
+import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, Text, View } from "react-native";
+
+export default function Header({
+  name,
+  subtitle,
+}: {
   name: string;
   subtitle: string;
-};
-
-export default function Header({ name, subtitle }: HeaderProps) {
+}) {
   return (
     <LinearGradient
       colors={["#2563eb", "#0f2e82"]}
       style={styles.container}
     >
-      <Text style={styles.greeting}>Olá, {name}! 👋</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <View style={styles.row}>
+        <View>
+          <Text style={styles.greeting}>
+            Olá, {name}!
+          </Text>
+          <Text style={styles.subtitle}>
+            {subtitle}
+          </Text>
+        </View>
+      </View>
     </LinearGradient>
   );
 }
@@ -26,6 +37,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   greeting: {
     fontSize: 22,
     color: "#fff",
@@ -35,5 +51,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
     color: "#c7d2fe",
+    textTransform: "capitalize",
   },
 });

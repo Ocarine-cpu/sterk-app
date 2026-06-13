@@ -1,49 +1,82 @@
+// src/components/PostCard.tsx
+// Compatível com o tipo Post do Firestore (src/types/index.ts)
+
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import { COLORS, FONT, SPACING } from "../styles/theme";
-import { Post } from "../types/Post";
+import { Post } from "../types";
+
+// Formata a data ISO para exibição relativa simples
+function formatarData(isoString: string): string {
+  try {
+    const data = new Date(isoString);
+    const agora = new Date();
+    const diffMs = agora.getTime() - data.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+
+    if (diffMin < 1)   return "agora";
+    if (diffMin < 60)  return `${diffMin}min atrás`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24)    return `${diffH}h atrás`;
+    return data.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+  } catch {
+    return "";
+  }
+}
+
+// Gera as iniciais do nome para o avatar
+function iniciais(nome: string): string {
+  return nome
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
 export default function PostCard({ post }: { post: Post }) {
+  const numCurtidas   = Array.isArray(post.curtidas)   ? post.curtidas.length   : 0;
+  const numComentarios = Array.isArray(post.comentarios) ? post.comentarios.length : 0;
+
   return (
     <View style={styles.card}>
       <View style={styles.row}>
-        
+
+        {/* Avatar com iniciais */}
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{post.avatar}</Text>
+          <Text style={styles.avatarText}>{iniciais(post.autorNome)}</Text>
         </View>
 
         <View style={{ flex: 1 }}>
-          
+
+          {/* Header do post */}
           <View style={styles.header}>
-            <Text style={styles.user}>{post.user}</Text>
-            <Text style={styles.time}>{post.timestamp}</Text>
+            <Text style={styles.user}>{post.autorNome}</Text>
+            <Text style={styles.time}>{formatarData(post.criadoEm)}</Text>
           </View>
 
-          <Text style={styles.caption}>{post.caption}</Text>
-
-          <View style={styles.badges}>
+          {/* Tipo de atividade */}
+          <View style={styles.badgeWrap}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{post.activity}</Text>
-            </View>
-
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{post.duration}</Text>
-            </View>
-
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{post.calories} kcal</Text>
+              <Text style={styles.badgeText}>{post.tipoAtividade}</Text>
             </View>
           </View>
 
+          {/* Texto do post */}
+          <Text style={styles.caption}>{post.texto}</Text>
+
+          {/* Ações */}
           <View style={styles.actions}>
             <TouchableOpacity style={styles.action}>
-              <Ionicons name="heart-outline" size={16} color="#999" />
-              <Text style={styles.actionText}>{post.likes}</Text>
+              <Ionicons name="heart-outline" size={16} color={COLORS.textSecondary} />
+              <Text style={styles.actionText}>{numCurtidas}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.action}>
-              <Ionicons name="chatbubble-outline" size={16} color="#999" />
-              <Text style={styles.actionText}>{post.comments}</Text>
+              <Ionicons name="chatbubble-outline" size={16} color={COLORS.textSecondary} />
+              <Text style={styles.actionText}>{numComentarios}</Text>
             </TouchableOpacity>
           </View>
 
@@ -60,14 +93,18 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderRadius: 16,
     backgroundColor: COLORS.card,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
   row: {
     flexDirection: "row",
     gap: SPACING.sm,
   },
-
   avatar: {
     width: 40,
     height: 40,
@@ -75,66 +112,61 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
-
   avatarText: {
     color: "#fff",
     fontWeight: "700",
+    fontSize: FONT.sm,
   },
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: SPACING.xs,
+    alignItems: "center",
+    marginBottom: 4,
   },
-
   user: {
     fontWeight: "700",
-    fontSize: FONT.lg,
+    fontSize: FONT.md,
     color: COLORS.text,
   },
-
   time: {
     fontSize: FONT.sm,
     color: COLORS.textSecondary,
   },
-
-  caption: {
-    fontSize: FONT.lg,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-
-  badges: {
+  badgeWrap: {
     flexDirection: "row",
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    marginBottom: 6,
   },
-
   badge: {
+    backgroundColor: "#eff6ff",
+    borderRadius: 20,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 6,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    borderColor: "#bfdbfe",
   },
-
   badgeText: {
     fontSize: FONT.sm,
-    color: COLORS.textSecondary,
+    color: COLORS.primary,
+    fontWeight: "600",
+    textTransform: "capitalize",
   },
-
+  caption: {
+    fontSize: FONT.md,
+    color: COLORS.text,
+    lineHeight: 20,
+    marginBottom: SPACING.sm,
+  },
   actions: {
     flexDirection: "row",
     gap: SPACING.lg,
   },
-
   action: {
     flexDirection: "row",
     alignItems: "center",
     gap: SPACING.xs,
   },
-
   actionText: {
     fontSize: FONT.md,
     color: COLORS.textSecondary,

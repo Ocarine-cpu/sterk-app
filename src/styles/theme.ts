@@ -1,3 +1,5 @@
+// src/styles/theme.ts
+
 export const COLORS = {
   primary: "#2563eb",
   background: "#f3f4f6",
